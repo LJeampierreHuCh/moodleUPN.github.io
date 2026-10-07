@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moodle Estudiante - Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f8f9fa; }
+        .hidden { display: none !important; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Animación suave para cambio de pestañas */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- ================= PANTALLA LOGIN ================= -->
+    <main id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 tracking-tight"><i class="fas fa-graduation-cap text-blue-600 mr-2"></i>UPN Virtual</h1>
+                <p class="text-sm text-gray-500 mt-2">Acceso a plataforma de aprendizaje</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Usuario</label>
+                    <input type="text" id="username" class="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: luis.huerta" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" class="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="123456" required>
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 font-medium">Ingresar</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- ================= APP PRINCIPAL ================= -->
+    <div id="moodle-app" class="hidden min-h-screen flex flex-col">
+        
+        <!-- HEADER CON MENSAJERÍA Y NOTIFICACIONES -->
+        <header class="bg-white shadow-sm border-b sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center cursor-pointer" onclick="goDashboard()">
+                    <i class="fas fa-graduation-cap text-blue-600 text-2xl mr-2"></i>
+                    <span class="text-xl font-bold text-gray-800">Moodle UPN</span>
+                </div>
+                <div class="flex items-center space-x-5 relative">
+                    
+                    <!-- Notificaciones -->
+                    <button onclick="toggleDropdown('notif-panel')" class="text-gray-500 hover:text-blue-600 relative">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">2</span>
+                    </button>
+                    <!-- Panel Notificaciones -->
+                    <div id="notif-panel" class="hidden absolute top-10 right-20 w-72 bg-white border rounded-lg shadow-xl overflow-hidden z-50">
+                        <div class="p-3 bg-gray-50 border-b font-bold text-sm">Notificaciones</div>
+                        <div class="p-3 border-b hover:bg-gray-50 cursor-pointer text-sm">
+                            <i class="fas fa-check-circle text-green-500 mr-1"></i> Tarea "Informe Lab 1" calificada.
+                        </div>
+                        <div class="p-3 hover:bg-gray-50 cursor-pointer text-sm">
+                            <i class="fas fa-calendar text-orange-500 mr-1"></i> El foro de Calidad de Software vence mañana.
+                        </div>
+                    </div>
+
+                    <!-- Mensajería -->
+                    <button onclick="toggleDropdown('msg-panel')" class="text-gray-500 hover:text-blue-600 relative">
+                        <i class="fas fa-comment text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">1</span>
+                    </button>
+                    <!-- Panel Mensajería -->
+                    <div id="msg-panel" class="hidden absolute top-10 right-10 w-72 bg-white border rounded-lg shadow-xl overflow-hidden z-50">
+                        <div class="p-3 bg-gray-50 border-b font-bold text-sm">Mensajes Privados</div>
+                        <div class="p-3 border-b flex items-center gap-3 hover:bg-gray-50 cursor-pointer">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-user"></i></div>
+                            <div class="text-sm">
+                                <p class="font-bold">Prof. Victor Hugo Alfaro</p>
+                                <p class="text-xs text-gray-500 truncate">No olviden revisar la rúbrica...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perfil -->
+                    <div class="flex items-center gap-2 border-l pl-5">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">LH</div>
+                        <span class="text-sm font-medium text-gray-700 hidden sm:block">Luis Huerta</span>
+                        <button onclick="logout()" class="text-xs text-gray-400 hover:text-red-500 ml-2" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- LOADER GLOBAL -->
+        <div id="global-loader" class="hidden fixed inset-0 bg-white bg-opacity-80 z-50 flex flex-col items-center justify-center">
+            <div class="loader mb-3"></div>
+            <p class="text-sm text-gray-600 font-medium">Procesando...</p>
+        </div>
+
+        <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+            
+            <!-- ================= DASHBOARD (MIS CURSOS) ================= -->
+            <section id="dashboard-view" class="fade-in">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Mis Cursos (Periodo 2026-2)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Curso 1 -->
+                    <div onclick="openCourse('Nomenclatura Química', 'quimica')" class="bg-white rounded-lg shadow border overflow-hidden hover:shadow-lg transition cursor-pointer group">
+                        <div class="h-32 bg-gradient-to-r from-blue-700 to-blue-500 flex items-end p-4">
+                            <h3 class="text-xl font-bold text-white group-hover:underline">Nomenclatura Química</h3>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-500 mb-3"><i class="fas fa-tasks mr-1"></i> 5 actividades pendientes</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-600 h-2 rounded-full" style="width: 20%"></div></div>
+                        </div>
+                    </div>
+                    <!-- Curso 2 -->
+                    <div onclick="openCourse('Calidad y Pruebas de Software', 'calidad')" class="bg-white rounded-lg shadow border overflow-hidden hover:shadow-lg transition cursor-pointer group">
+                        <div class="h-32 bg-gradient-to-r from-orange-600 to-yellow-500 flex items-end p-4">
+                            <h3 class="text-xl font-bold text-white group-hover:underline">Calidad y Pruebas de Software</h3>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-500 mb-3"><i class="fas fa-tasks mr-1"></i> 1 actividad pendiente</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-orange-500 h-2 rounded-full" style="width: 85%"></div></div>
+                        </div>
+                    </div>
+                    <!-- Curso 3 -->
+                    <div onclick="openCourse('Matemática Aplicada', 'mate')" class="bg-white rounded-lg shadow border overflow-hidden hover:shadow-lg transition cursor-pointer group">
+                        <div class="h-32 bg-gradient-to-r from-purple-700 to-purple-500 flex items-end p-4">
+                            <h3 class="text-xl font-bold text-white group-hover:underline">Matemática Aplicada</h3>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-500 mb-3"><i class="fas fa-check text-green-500 mr-1"></i> Sin pendientes</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VISTA DENTRO DE UN CURSO ================= -->
+            <section id="course-view" class="hidden fade-in">
+                <button onclick="goDashboard()" class="mb-4 text-sm text-gray-500 hover:text-blue-600 font-medium">
+                    <i class="fas fa-arrow-left mr-1"></i> Volver a Mis Cursos
+                </button>
+                
+                <h1 id="course-title" class="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Nombre del Curso</h1>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    
+                    <!-- MENÚ LATERAL (Navegación de Secciones) -->
+                    <aside class="w-full md:w-64 shrink-0">
+                        <nav class="bg-white border rounded-lg shadow-sm p-2 flex flex-col gap-1">
+                            <button onclick="switchTab('general')" id="nav-general" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium transition text-blue-700 bg-blue-50"><i class="fas fa-home w-5"></i> General / Calendario</button>
+                            <button onclick="switchTab('materiales')" id="nav-materiales" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition"><i class="fas fa-folder-open w-5"></i> Materiales</button>
+                            <button onclick="switchTab('actividades')" id="nav-actividades" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition"><i class="fas fa-tasks w-5"></i> Actividades y Tareas</button>
+                            <button onclick="switchTab('cuestionarios')" id="nav-cuestionarios" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition"><i class="fas fa-clipboard-list w-5"></i> Cuestionarios</button>
+                            <button onclick="switchTab('foros')" id="nav-foros" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition"><i class="fas fa-comments w-5"></i> Foros de Discusión</button>
+                            <button onclick="switchTab('calificaciones')" id="nav-calificaciones" class="nav-btn text-left px-4 py-3 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition"><i class="fas fa-chart-line w-5"></i> Calificaciones</button>
+                        </nav>
+                    </aside>
+
+                    <!-- CONTENIDO DE LAS SECCIONES -->
+                    <div class="flex-1 bg-white border rounded-lg shadow-sm p-6 min-h-[500px]">
+                        
+                        <!-- 1. GENERAL & CALENDARIO -->
+                        <div id="tab-general" class="tab-content fade-in">
+                            <h2 class="text-xl font-bold mb-4"><i class="fas fa-bullhorn text-blue-500 mr-2"></i>Avisos y Calendario</h2>
+                            <p class="text-gray-600 mb-6">Bienvenidos al curso. Revisen regularmente esta sección para mantenerse al día con el cronograma.</p>
+                            <div class="border rounded-lg p-4 bg-blue-50">
+                                <h3 class="font-bold text-gray-800 mb-3"><i class="far fa-calendar-alt mr-2"></i> Próximos Eventos</h3>
+                                <ul class="space-y-3">
+                                    <li class="flex items-center justify-between bg-white p-3 rounded border">
+                                        <div><p class="font-bold text-sm">Cierre de Práctica de Campo</p><p class="text-xs text-gray-500">Actividad</p></div>
+                                        <div class="text-right"><p class="text-sm font-bold text-red-500">Mañana, 23:59</p></div>
+                                    </li>
+                                    <li class="flex items-center justify-between bg-white p-3 rounded border">
+                                        <div><p class="font-bold text-sm">Sesión Síncrona (Zoom)</p><p class="text-xs text-gray-500">Clase en vivo</p></div>
+                                        <div class="text-right"><p class="text-sm font-bold text-blue-600">Jueves, 18:00</p></div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 2. MATERIALES -->
+                        <div id="tab-materiales" class="tab-content hidden fade-in">
+                            <h2 class="text-xl font-bold mb-4 border-b pb-2"><i class="fas fa-folder-open text-blue-500 mr-2"></i>Recursos Académicos</h2>
+                            <div class="grid gap-3">
+                                <a href="#" class="flex items-center p-4 border rounded hover:bg-gray-50 transition">
+                                    <i class="fas fa-file-pdf text-red-500 text-3xl mr-4"></i>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-blue-600 hover:underline">Sílabo del Curso.pdf</h4>
+                                        <p class="text-xs text-gray-500">1.2 MB - Documento principal</p>
+                                    </div>
+                                    <i class="fas fa-download text-gray-400"></i>
+                                </a>
+                                <a href="#" class="flex items-center p-4 border rounded hover:bg-gray-50 transition">
+                                    <i class="fas fa-file-powerpoint text-orange-500 text-3xl mr-4"></i>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-blue-600 hover:underline">Semana 1: Introducción a los conceptos.pptx</h4>
+                                        <p class="text-xs text-gray-500">4.5 MB - Diapositivas</p>
+                                    </div>
+                                    <i class="fas fa-download text-gray-400"></i>
+                                </a>
+                                <a href="#" class="flex items-center p-4 border rounded hover:bg-gray-50 transition">
+                                    <i class="fas fa-play-circle text-blue-500 text-3xl mr-4"></i>
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-blue-600 hover:underline">Grabación Sesión 1</h4>
+                                        <p class="text-xs text-gray-500">Enlace a video (Zoom)</p>
+                                    </div>
+                                    <i class="fas fa-external-link-alt text-gray-400"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 3. ACTIVIDADES Y TAREAS (Con simulación de subida) -->
+                        <div id="tab-actividades" class="tab-content hidden fade-in">
+                            <h2 class="text-xl font-bold mb-4 border-b pb-2"><i class="fas fa-tasks text-blue-500 mr-2"></i>Entregables</h2>
+                            
+                            <!-- Tarea 1 -->
+                            <div class="border rounded-lg p-5 mb-4 relative overflow-hidden">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="font-bold text-lg">Práctica de Campo 03 - Informe Final</h3>
+                                    <span id="badge-tarea1" class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">Sin entregar</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">Adjunte aquí el documento de su proyecto final en formato PDF.</p>
+                                
+                                <!-- Simulación de Input de Archivo -->
+                                <div id="upload-box-tarea1" class="bg-gray-50 border-2 border-dashed border-gray-300 rounded p-6 text-center">
+                                    <input type="file" id="file-tarea1" class="hidden" onchange="document.getElementById('file-name-tarea1').innerText = this.files[0].name">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500 mb-3">Arrastre un archivo o haga clic para buscar</p>
+                                    <button onclick="document.getElementById('file-tarea1').click()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-bold py-1 px-3 rounded">Examinar equipo...</button>
+                                    <p id="file-name-tarea1" class="mt-2 text-sm font-bold text-blue-600"></p>
+                                    <button onclick="enviarTarea('tarea1')" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">Guardar cambios (Enviar)</button>
+                                </div>
+                                <!-- Estado Entregado -->
+                                <div id="success-tarea1" class="hidden bg-green-50 border border-green-200 p-4 rounded mt-2 flex items-center">
+                                    <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
+                                    <div>
+                                        <p class="font-bold text-green-800">Enviado para calificar</p>
+                                        <p class="text-xs text-green-600">Tu archivo ha sido registrado en el sistema exitosamente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. CUESTIONARIOS -->
+                        <div id="tab-cuestionarios" class="tab-content hidden fade-in">
+                            <h2 class="text-xl font-bold mb-4 border-b pb-2"><i class="fas fa-clipboard-list text-blue-500 mr-2"></i>Evaluaciones en Línea</h2>
+                            
+                            <div id="quiz-intro" class="border rounded-lg p-6 bg-white shadow-sm">
+                                <h3 class="font-bold text-lg mb-2">Evaluación T1</h3>
+                                <p class="text-sm text-gray-600 mb-2">Intentos permitidos: 1</p>
+                                <p class="text-sm text-gray-600 mb-4">Límite de tiempo: 20 minutos</p>
+                                <button onclick="iniciarQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Resolver el cuestionario ahora</button>
+                            </div>
+
+                            <!-- Formulario de Quiz Simulado -->
+                            <div id="quiz-form" class="hidden border rounded-lg p-6 bg-gray-50">
+                                <h3 class="font-bold text-lg mb-4 text-blue-700">Evaluación T1 - En progreso</h3>
+                                <div class="mb-6 bg-white p-4 border rounded">
+                                    <p class="font-bold mb-3">1. Según la norma ISO 25010, ¿qué atributo evalúa que el sistema pueda ser usado por personas con distintas capacidades?</p>
+                                    <label class="block mb-2 text-sm cursor-pointer"><input type="radio" name="q1" class="mr-2"> Fiabilidad</label>
+                                    <label class="block mb-2 text-sm cursor-pointer"><input type="radio" name="q1" class="mr-2"> Accesibilidad</label>
+                                    <label class="block mb-2 text-sm cursor-pointer"><input type="radio" name="q1" class="mr-2"> Seguridad</label>
+                                </div>
+                                <button onclick="enviarQuiz()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">Terminar intento y enviar</button>
+                            </div>
+
+                            <!-- Resultado Quiz -->
+                            <div id="quiz-result" class="hidden border border-green-200 rounded-lg p-6 bg-green-50 text-center">
+                                <i class="fas fa-trophy text-yellow-500 text-4xl mb-2"></i>
+                                <h3 class="font-bold text-xl text-green-800">Cuestionario finalizado</h3>
+                                <p class="text-green-700 mt-2">Calificación obtenida: <span class="font-bold text-2xl">20.00</span> / 20.00</p>
+                            </div>
+                        </div>
+
+                        <!-- 5. FOROS -->
+                        <div id="tab-foros" class="tab-content hidden fade-in">
+                            <h2 class="text-xl font-bold mb-4 border-b pb-2"><i class="fas fa-comments text-blue-500 mr-2"></i>Foro de Consultas y Debate</h2>
+                            
+                            <div class="mb-6">
+                                <textarea id="forum-input" class="w-full border rounded-lg p-3 text-sm focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Añadir un nuevo tema de debate..."></textarea>
+                                <button onclick="publicarForo()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded">Publicar en el foro</button>
+                            </div>
+
+                            <div id="forum-posts" class="space-y-4">
+                                <!-- Mensaje hardcodeado -->
+                                <div class="border rounded-lg p-4 bg-gray-50 flex gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0"><i class="fas fa-user text-blue-500"></i></div>
+                                    <div>
+                                        <p class="font-bold text-sm text-blue-800">Docente del Curso <span class="text-xs text-gray-500 font-normal ml-2">Hace 2 días</span></p>
+                                        <p class="text-sm mt-1 text-gray-700">Bienvenidos al foro. Por favor, utilicen este espacio para dudas sobre el proyecto de evaluación de calidad y métricas Lighthouse.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. CALIFICACIONES -->
+                        <div id="tab-calificaciones" class="tab-content hidden fade-in">
+                            <h2 class="text-xl font-bold mb-4 border-b pb-2"><i class="fas fa-chart-line text-blue-500 mr-2"></i>Reporte de Calificaciones</h2>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full border-collapse border border-gray-200">
+                                    <thead class="bg-gray-100 text-xs uppercase font-bold text-gray-600">
+                                        <tr>
+                                            <th class="border border-gray-200 px-4 py-3 text-left">Ítem de calificación</th>
+                                            <th class="border border-gray-200 px-4 py-3 text-center">Calificación</th>
+                                            <th class="border border-gray-200 px-4 py-3 text-center">Rango</th>
+                                            <th class="border border-gray-200 px-4 py-3 text-left">Retroalimentación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-sm">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="border border-gray-200 px-4 py-3 font-medium"><i class="fas fa-file-alt text-blue-500 mr-2"></i>Práctica de Campo 01</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center font-bold">18.00</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center text-gray-500">0 - 20</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-gray-600 text-xs">Buen análisis de la ISO 25010.</td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="border border-gray-200 px-4 py-3 font-medium"><i class="fas fa-file-alt text-blue-500 mr-2"></i>Práctica de Campo 02</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center font-bold">20.00</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center text-gray-500">0 - 20</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-gray-600 text-xs">Excelentes casos de prueba evidenciados.</td>
+                                        </tr>
+                                        <tr class="bg-blue-50 font-bold">
+                                            <td class="border border-gray-200 px-4 py-3 text-right">Total del curso (Hasta ahora)</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center">19.00</td>
+                                            <td class="border border-gray-200 px-4 py-3 text-center">-</td>
+                                            <td class="border border-gray-200 px-4 py-3"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA SPA (Single Page Application) -->
+    <script>
+        // 1. Lógica de Login
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('moodle-app').classList.remove('hidden');
+        });
+
+        function logout() {
+            document.getElementById('moodle-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // 2. Navegación Global (Dropdowns)
+        function toggleDropdown(id) {
+            const panel = document.getElementById(id);
+            if(panel.classList.contains('hidden')) {
+                // Cerrar todos primero
+                document.getElementById('notif-panel').classList.add('hidden');
+                document.getElementById('msg-panel').classList.add('hidden');
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        // 3. Navegación Cursos
+        function goDashboard() {
+            document.getElementById('course-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+        }
+
+        function openCourse(courseName, id) {
+            mostrarLoader(() => {
+                document.getElementById('dashboard-view').classList.add('hidden');
+                document.getElementById('course-view').classList.remove('hidden');
+                document.getElementById('course-title').innerText = courseName;
+                switchTab('general'); // Abrir pestaña default
+            });
+        }
+
+        // 4. Navegación Secciones (Menú lateral)
+        function switchTab(tabId) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Resetear estilos de los botones
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-700', 'bg-blue-50');
+                btn.classList.add('text-gray-600');
+            });
+
+            // Mostrar el target
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-gray-600');
+            activeBtn.classList.add('text-blue-700', 'bg-blue-50');
+        }
+
+        // 5. Simulación Tareas (Gestión y Cumplimiento)
+        function enviarTarea(id) {
+            const fileText = document.getElementById('file-name-' + id).innerText;
+            if(!fileText) { alert("Por favor seleccione un archivo primero."); return; }
+            
+            mostrarLoader(() => {
+                document.getElementById('upload-box-' + id).classList.add('hidden');
+                document.getElementById('success-' + id).classList.remove('hidden');
+                const badge = document.getElementById('badge-' + id);
+                badge.innerText = "Enviado para calificar";
+                badge.classList.replace('bg-gray-200', 'bg-green-100');
+                badge.classList.replace('text-gray-700', 'text-green-800');
+            });
+        }
+
+        // 6. Simulación Cuestionarios
+        function iniciarQuiz() {
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-form').classList.remove('hidden');
+        }
+
+        function enviarQuiz() {
+            mostrarLoader(() => {
+                document.getElementById('quiz-form').classList.add('hidden');
+                document.getElementById('quiz-result').classList.remove('hidden');
+            });
+        }
+
+        // 7. Simulación Foros (Comunicación)
+        function publicarForo() {
+            const input = document.getElementById('forum-input');
+            const texto = input.value.trim();
+            if(!texto) return;
+
+            mostrarLoader(() => {
+                const postHTML = `
+                <div class="border rounded-lg p-4 bg-white flex gap-4 fade-in">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold">LH</div>
+                    <div>
+                        <p class="font-bold text-sm text-gray-800">Luis Huerta <span class="text-xs text-gray-500 font-normal ml-2">Hace un momento</span></p>
+                        <p class="text-sm mt-1 text-gray-700">${texto}</p>
+                    </div>
+                </div>`;
+                document.getElementById('forum-posts').insertAdjacentHTML('afterbegin', postHTML);
+                input.value = '';
+            });
+        }
+
+        // Utilidad: Loader global que simula latencia de red (Atendiendo Incidencias de Rendimiento)
+        function mostrarLoader(callback) {
+            const loader = document.getElementById('global-loader');
+            loader.classList.remove('hidden');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                callback();
+            }, 600); // 600ms de retraso simulado
+        }
+    </script>
+</body>
+</html>
